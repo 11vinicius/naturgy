@@ -5,6 +5,35 @@ var AJUSTAR_SOLICITACAO = 7
 var APROVACAO_II = 9
 var FIM = 5
 
+var beforeSendValidate = function(numState,nextState){
+   if (numState == INICIO0 || numState == INICIO1 || numState == AJUSTAR_SOLICITACAO) {
+    setTimeout(() => {
+      var campos = $('.obgInicio')
+      
+      for (var i = 0; i < campos.length; i++) {
+        var campo = campos[i]
+        const campoItem = $(campo).parent().find('input, select, textarea')
+        const campoType = $(campoItem).attr('type')
+        const campoName = $(campoItem).attr('name')
+        if ($("#" + campoName).val() == "" && campoType == "zoom") {
+          $(campo).siblings("span").children(":first").children().css({ "border-color": "#e57200" })
+          $(campo).change(() => {
+            if ($("#" + campoName).val() != "") $("#" + campoName).siblings("span").children(":first").children().css({ "border-color": "#004571" })
+            else $("#" + campoName).siblings("span").children(":first").children().css({ "border-color": "#e57200" })
+          })
+        }
+        if ($("#" + campoName).val() == "") {
+          $("#" + campoName).css({ "border-color": "#e57200" })
+          $("#" + campoName).change(function () {
+            if ($("#" + campoName).val() == "") $("#" + campoName).css({ "border-color": "#e57200" })
+            else $("#" + campoName).css({ "border-color": "#004571" })
+          })
+        }
+      }
+    }, 1500)
+  }
+}
+
 function comContrato() {
   var sociedade = $("#sociedade").val(); //SEG
   //var tipo = "Juros"
@@ -16,7 +45,9 @@ function comContrato() {
     var contaOT = dataset.values[0].contaOT
     var ordemTrabalhoOT = dataset.values[0].ordemTrabalhoOT
     $("#conta").val(contaOT)
+    $("#conta").css({ "border-color": "#004571" })
     $("#ordemTrabalho").val(ordemTrabalhoOT)
+    $("#ordemTrabalho").css({ "border-color": "#004571" })
   }
 
 }
@@ -55,7 +86,7 @@ function semContrato() {
       var apolice = dataset3.values[0].apolice
       var reclamante = dataset3.values[0].reclamante
       if (caucao) {
-        $("#numeroContrato").find('label').removeClass('required')
+        $(".numeroContrato").find('label').removeClass('required')
       }
       $("#vara").val(vara)
       $("#municipio").val(municipio)
@@ -129,7 +160,6 @@ $(document).ready(() => {
   }
 
   $('#oFiltro').on('click', function () {
-
     if ($('.tipoAlbaran:checked').val() == 'comContrato') {
       comContrato();
     } else {
@@ -231,7 +261,8 @@ $(document).ready(() => {
   }
   if ($(".tipoAlbaran:checked").val() == "comContrato") {
     $(".divNumeroProcesso").hide();
-    $("#numeroContrato").find('label').addClass('required')
+    $(".numeroContrato").find('label').addClass('required')
+    $("#numeroNotaFiscal").addClass('obgInicio')
     $(".divTerceirizada").hide();
     $(".divTotal").hide();
     $(".divApolice").hide();
@@ -249,8 +280,9 @@ $(document).ready(() => {
     window['sociedade'].clear();
 
     if (this.value == "comContrato") {
-      $("#numeroContrato").find('label').addClass('required')
+      $(".numeroContrato").find('label').addClass('required')
       $("#numeroNotaFiscal").find('label').addClass('required')
+      $("#numeroNotaFiscal").addClass('obgInicio')
       $(".divNumeroProcesso").hide("slow");
       $(".divTerceirizada").hide("slow");
       $(".divTotal").hide("slow");
@@ -261,6 +293,7 @@ $(document).ready(() => {
       $(".divcontratocaucao").hide();
 
     } else {
+      $("#numeroNotaFiscal").removeClass('obgInicio')
       $(".divNumeroProcesso").show("slow");
       $(".divTerceirizada").show("slow");
       $(".divTotal").show("slow");
@@ -280,7 +313,7 @@ $(document).ready(() => {
     let albaran = ev.target.value
     if (albaran == "comContrato") {
       $("#divComContrato").show()
-      $("#numeroContrato").show()
+      $(".numeroContrato").show()
       $(".divcnpj").show();
       $(".divnotafiscal").removeClass('required')
       $("#divnotafiscal").find('label').addClass('required')
@@ -298,7 +331,7 @@ $(document).ready(() => {
       $("#SomarValue").show();
       $(".divnotafiscal").addClass('required')
       $("#divnotafiscal").find('label').removeClass('required')
-
+      $("#numeroNotaFiscal").removeClass('obgInicio')
     }
   })
 
@@ -343,34 +376,34 @@ $(document).ready(() => {
     }
   })
 
-  if (WKNumState == INICIO0 || WKNumState == INICIO1 || WKNumState == AJUSTAR_SOLICITACAO) {
-    setTimeout(() => {
-      $("#numeroProcesso").addClass("obgInicio")
-      $("#tipo").addClass("obgInicio")
-      $("#emitente").addClass("obgInicio")
-      var campos = $('.obgInicio')
-      for (var i = 0; i < campos.length; i++) {
-        var campo = campos[i]
-        const campoItem = $(campo).parent().find('input, select, textarea')
-        const campoType = $(campoItem).attr('type')
-        const campoName = $(campoItem).attr('name')
-        if ($("#" + campoName).val() == "" && campoType == "zoom") {
-          $(campo).siblings("span").children(":first").children().css({ "border-color": "#e57200" })
-          $(campo).change(() => {
-            if ($("#" + campoName).val() != "") $("#" + campoName).siblings("span").children(":first").children().css({ "border-color": "" })
-            else $("#" + campoName).siblings("span").children(":first").children().css({ "border-color": "#e57200" })
-          })
-        }
-        if ($("#" + campoName).val() == "") {
-          $("#" + campoName).css({ "border-color": "#e57200" })
-          $("#" + campoName).change(function () {
-            if ($("#" + campoName).val() == "") $("#" + campoName).css({ "border-color": "#e57200" })
-            else $("#" + campoName).css({ "border-color": "" })
-          })
-        }
-      }
-    }, 1500)
-  }
+  // if (WKNumState == INICIO0 || WKNumState == INICIO1 || WKNumState == AJUSTAR_SOLICITACAO) {
+  //   setTimeout(() => {
+  //     $("#numeroProcesso").addClass("obgInicio")
+  //     $("#tipo").addClass("obgInicio")
+  //     $("#emitente").addClass("obgInicio")
+  //     var campos = $('.obgInicio')
+  //     for (var i = 0; i < campos.length; i++) {
+  //       var campo = campos[i]
+  //       const campoItem = $(campo).parent().find('input, select, textarea')
+  //       const campoType = $(campoItem).attr('type')
+  //       const campoName = $(campoItem).attr('name')
+  //       if ($("#" + campoName).val() == "" && campoType == "zoom") {
+  //         $(campo).siblings("span").children(":first").children().css({ "border-color": "#e57200" })
+  //         $(campo).change(() => {
+  //           if ($("#" + campoName).val() != "") $("#" + campoName).siblings("span").children(":first").children().css({ "border-color": "#004571" })
+  //           else $("#" + campoName).siblings("span").children(":first").children().css({ "border-color": "#e57200" })
+  //         })
+  //       }
+  //       if ($("#" + campoName).val() == "") {
+  //         $("#" + campoName).css({ "border-color": "#e57200" })
+  //         $("#" + campoName).change(function () {
+  //           if ($("#" + campoName).val() == "") $("#" + campoName).css({ "border-color": "#e57200" })
+  //           else $("#" + campoName).css({ "border-color": "#004571" })
+  //         })
+  //       }
+  //     }
+  //   }, 1500)
+  // }
 
   let btnGerarAlbaran = $("#btnGerarAlbaran")
   btnGerarAlbaran.on("click", () => {
