@@ -1,0 +1,919 @@
+<html>
+<head>
+	<link type="text/css" rel="stylesheet" href="/style-guide/css/fluig-style-guide.min.css" />
+	<script type="text/javascript" src="/portal/resources/js/jquery/jquery.js"></script>
+	<script type="text/javascript" src="/portal/resources/js/jquery/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="/portal/resources/js/mustache/mustache-min.js"></script>
+	<script type="text/javascript" src="/style-guide/js/fluig-style-guide.min.js" charset="utf-8"></script>
+	<script type="text/javascript" src="/webdesk/vcXMLRPC.js"></script>
+	<script type="text/javascript" src="main.js"></script>
+	<script src="https://plentz.github.io/jquery-maskmoney/javascripts/jquery.maskMoney.min.js"
+		type="text/javascript"></script>
+	<script src="excel.js" type="text/javascript"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+	<script src="https://unpkg.com/pdf-lib@1.11.0"></script>
+	<script src="https://unpkg.com/downloadjs@1.4.7"></script>
+	<link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" />
+	<style>
+		.required:after {
+			content: " *";
+			color: #e57200
+		}
+	</style>
+	<style>
+		.readonly {
+			background: #eee;
+			pointer-events: none;
+			touch-action: none
+		}
+
+		.form-control aprovadores {
+			float: right;
+			font-size: 15px;
+			margin-top: 10px;
+			margin-right: 15px;
+			color: #706f6f
+		}
+
+		fieldset.jr-border {
+			border: 1px groove #ddd !important;
+			padding: 0 1.4em 1.4em 1.4em !important;
+			margin: 0 0 1.5em 0 !important;
+			-webkit-box-shadow: 0px 0px 0px 0px #000;
+			box-shadow: 0px 0px 0px 0px #000;
+		}
+
+		legend.jr-border {
+			width: inherit !important;
+			/* Or auto */
+			padding: 0 10px !important;
+			/* To give a bit of padding on the left and right */
+			border-bottom: none !important;
+			font-weight: bold !important;
+			font-size: 16px !important;
+		}
+
+		.fluig-style-guide legend {
+			color: blue !important;
+			background-color: lavender !important;
+		}
+
+		.hoverButton:hover {
+			background-color: #dee1ea;
+			border-radius: 8px;
+			padding: 2px;
+			cursor: pointer;
+		}
+	</style>
+	<script>
+		const { PDFDocument } = PDFLib
+		const criarPasta = async (callback) => {
+			let idPasta = 0
+			if (window.location.origin.indexOf("dev") > -1) idPasta = 1655
+			else idPasta = 0
+			const request_data_folder = {
+				url: window.location.origin + '/api/public/ecm/document/createFolder',
+				method: 'POST'
+			}
+			const dataFolder = {
+				"description": $("#numeroSolicitacao").val(),
+				"parentId": parseInt(idPasta)
+			}
+			$.ajax({
+				url: request_data_folder.url,
+				crossDomain: true,
+				async: true,
+				type: request_data_folder.method,
+				data: JSON.stringify(dataFolder),
+				contentType: "application/json",
+				success: (function (response) {
+					const idFolder = response.content.id
+					callback(idFolder)
+				})
+			})
+		}
+		const criarDocumento = async (file, idPasta, callback) => {
+			const fileName = file.name
+			const request_data_ecm = {
+				url: window.location.origin + '/ecm/upload',
+				method: 'POST'
+			}
+			const request_data_document = {
+				url: window.location.origin + '/api/public/ecm/document/createDocument',
+				method: 'POST'
+			}
+			const formData = new FormData()
+			formData.append(fileName, file)
+			$.ajax({
+				async: true,
+				crossDomain: true,
+				url: request_data_ecm.url,
+				method: request_data_ecm.method,
+				processData: false,
+				contentType: false,
+				mimeType: "multipart/form-data",
+				data: formData,
+				success: (() => {
+					const dataDocument = {
+						"description": fileName,
+						"parentId": idPasta,
+						"downloadEnabled": true,
+						"attachments": [{
+							"fileName": fileName
+						}],
+					}
+					$.ajax({
+						async: true,
+						crossDomain: true,
+						url: request_data_document.url,
+						type: request_data_document.method,
+						contentType: "application/json",
+						processData: false,
+						data: JSON.stringify(dataDocument),
+						success: (function (response) {
+							const result = response.content.id
+							callback(result)
+						})
+					})
+				})
+			})
+		}
+		const excluirDocumento = async (documentId, callback) => {
+			const request_data_folder = {
+				url: window.location.origin + '/content-management/api/v2/documents/' + documentId,
+				method: 'DELETE'
+			}
+			try {
+				$.ajax({
+					url: request_data_folder.url,
+					crossDomain: true,
+					async: true,
+					type: request_data_folder.method,
+					success: (function (response) {
+						callback()
+					})
+				})
+			} catch (error) {
+				console.log(error)
+			}
+		}
+		async function gerarPDF(documentId) {
+			const urlDownload = window.location.origin + '/api/public/2.0/documents/getDownloadURL/' + documentId
+			const response = await fetch(urlDownload)
+			const data = await response.json()
+			const formUrl = data.content
+			const formPdfBytes = await fetch(formUrl).then(res => res.arrayBuffer())
+			const pdfDoc = await PDFDocument.load(formPdfBytes)
+			const form = pdfDoc.getForm()
+
+			const EMPRESA = form.getTextField('EMPRESA')
+			const sociedade = $("#sociedade").val()
+
+			EMPRESA.setText(sociedade)
+
+			const DATA_PAGAMENTO = form.getTextField('DATA_PAGAMENTO')
+			const dataPagamento = $("#dataPagamento").val()
+			DATA_PAGAMENTO.setText(dataPagamento)
+
+			const NUMERO_ALBARAN = form.getTextField('NUMERO_ALBARAN')
+			let today = new Date()
+			let yyyy = today.getFullYear()
+			let numeroSolicitacao = $("#numeroSolicitacao").val() + "/" + yyyy
+			NUMERO_ALBARAN.setText(numeroSolicitacao)
+
+			const NOME_EMITENTE = form.getTextField('NOME_EMITENTE')
+			const emitente = $("#emitente").val()
+			NOME_EMITENTE.setText(emitente)
+
+			const DIRECAO_GERENCIA = form.getTextField('DIRECAO_GERENCIA')
+			DIRECAO_GERENCIA.setText("DIRETORIA DE PESSOAS E ORGANIZAÇÃO / RELAÇÕES TRABALHISTAS")
+
+			const NOME_FAVORECIDO = form.getTextField('NOME_FAVORECIDO')
+			const favorecido = $("#favorecido").val()
+			NOME_FAVORECIDO.setText(favorecido)
+
+			const CONTA_CONTABIL = form.getTextField('CONTA_CONTABIL')
+			const conta = $("#conta").val()
+			CONTA_CONTABIL.setText(conta)
+
+			const CONTA_JUROS = form.getTextField('CONTA_JUROS')
+			const contaJuros = $("#contaJuros").val()
+			CONTA_JUROS.setText(contaJuros)
+
+			const CONTA_CAUCAO = form.getTextField('CONTA_CAUCAO')
+			const contaCaucao = $("#contaCaucao").val()
+			CONTA_CAUCAO.setText(contaCaucao)
+
+			const ORDEM_TRABALHO = form.getTextField('ORDEM_TRABALHO')
+			const ordemTrabalho = $("#ordemTrabalho").val()
+			ORDEM_TRABALHO.setText(ordemTrabalho)
+
+			const ORDEM_TRABALHO_JUROS = form.getTextField('ORDEM_TRABALHO_JUROS')
+			const ordemTrabalhoJuros = $("#ordemTrabalhoJuros").val()
+			ORDEM_TRABALHO_JUROS.setText(ordemTrabalhoJuros)
+
+			const PROCESSO = form.getTextField('PROCESSO')
+			const numeroProcesso = $("#numeroProcesso").val()
+			PROCESSO.setText(numeroProcesso)
+
+			const RECLAMANTE = form.getTextField('RECLAMANTE')
+			const reclamanteRTE = $("#reclamanteRTE").val()
+			RECLAMANTE.setText(reclamanteRTE)
+
+			const MUNICIPIO = form.getTextField('MUNICIPIO')
+			const municipio = $("#municipio").val()
+			MUNICIPIO.setText(municipio)
+
+			const VARA = form.getTextField('VARA')
+			const vara = $("#vara").val()
+			VARA.setText(vara)
+
+			const TIPO_PAGAMENTO = form.getTextField('TIPO_PAGAMENTO')
+			const tipo = $("#tipo").val()
+			TIPO_PAGAMENTO.setText(tipo)
+
+			const ESCRITORIO = form.getTextField('ESCRITORIO')
+			const escritorio = $("#escritorio").val()
+			ESCRITORIO.setText(escritorio)
+
+			const TERCEIRIZADA = form.getTextField('TERCEIRIZADA')
+			const terceirizada = $("#terceirizada").val()
+			TERCEIRIZADA.setText(terceirizada)
+
+			const COD_TERCEIRIZADA = form.getTextField('COD_TERCEIRIZADA')
+			const numeroFornecedor = $("#numeroFornecedor").val()
+			COD_TERCEIRIZADA.setText(numeroFornecedor)
+
+			const CONTRATO = form.getTextField('CONTRATO')
+			const numeroContrato = $("#numeroContrato").val()
+			CONTRATO.setText(numeroContrato)
+
+			const NOTA_FISCAL = form.getTextField('NOTA_FISCAL')
+			const numeroNotaFiscal = $("#numeroNotaFiscal").val()
+			NOTA_FISCAL.setText(numeroNotaFiscal)
+
+			const VALOR_PRINCIPAL = form.getTextField('VALOR_PRINCIPAL')
+			const valorPf = $("#valorPf").val()
+			VALOR_PRINCIPAL.setText(valorPf)
+
+			const VALOR_JUROS = form.getTextField('VALOR_JUROS')
+			const juros = $("#juros").val()
+			VALOR_JUROS.setText(juros)
+
+			const VALOR_CAUCAO = form.getTextField('VALOR_CAUCAO')
+			const caucaoCondenacao = $("#caucaoCondenacao").val()
+			VALOR_CAUCAO.setText(caucaoCondenacao)
+
+			const VALOR_TOTAL = form.getTextField('VALOR_TOTAL')
+			const total = $("#total").val()
+			VALOR_TOTAL.setText(total)
+
+			const FORMA_PAGAMENTO = form.getTextField('FORMA_PAGAMENTO')
+			const formaPagamento = $("#formaPagamento").val()
+			FORMA_PAGAMENTO.setText(formaPagamento)
+
+			const dataEmissao = $("#dataEmissao").val()
+			const DATA_EMISSAO1 = form.getTextField('DATA_EMISSAO1')
+			DATA_EMISSAO1.setText(dataEmissao)
+			const DATA_EMISSAO2 = form.getTextField('DATA_EMISSAO2')
+			DATA_EMISSAO2.setText(dataEmissao)
+
+			const pdfBytes = await pdfDoc.save()
+			const nomeAlbaran = "Albaran - " + $("#numeroSolicitacao").val() + ".pdf"
+			//download(pdfBytes, nomeAlbaran, "application/pdf")
+			const blobDoDocumento = new Blob([pdfBytes])
+			const arquivoDoDocumento = new File([blobDoDocumento], nomeAlbaran)
+
+			const idPasta = $("#idPasta").val()
+			const idAlbaran = $("#idAlbaran").val()
+
+			if (idAlbaran == "" || idPasta == "") {
+				criarPasta(responsePasta => {
+					$("#idPasta").val(responsePasta)
+					criarDocumento(arquivoDoDocumento, responsePasta, responseDocumento => {
+						$("#idAlbaran").val(responseDocumento)
+						FLUIGC.toast({ title: '', message: 'Albaran gerado com sucesso, id do documento: ' + responseDocumento, type: 'success' })
+					})
+				})
+			} else {
+				excluirDocumento(idAlbaran)
+				excluirDocumento(idPasta)
+				criarPasta(responsePasta => {
+					$("#idPasta").val(responsePasta)
+					criarDocumento(arquivoDoDocumento, responsePasta, responseDocumento => {
+						$("#idAlbaran").val(responseDocumento)
+						FLUIGC.toast({ title: '', message: 'Albaran gerado com sucesso, id do documento: ' + responseDocumento, type: 'success' })
+					})
+				})
+			}
+		}
+	</script>
+</head>
+<body>
+	<div class="fluig-style-guide" style="color: #004571;">
+		<form name="form" role="form">
+			<div class="col-md-offset-1 col-md-10 panel panel-default">
+				<div class="page-header">
+					<div class="row">
+						<div class="col-xs-12">
+							<h1 class="fs-no-margin fs-ellipsis fs-full-width">
+								<i class="fas fa-tasks"></i> Controle de Processos Laborais <small
+									class="hidden-xs"></small>
+
+							</h1>
+
+						</div>
+					</div>
+				</div>
+				<section id="secDadosControle">
+					<div class="panel panel-default">
+						<div class="page-header">
+							<h2 class="painel-titulo">
+								<span style="padding-left: 20px;"
+									class="fs-no-margin fs-ellipsis fs-full-width fs-sm-padding-left">
+									<i class="fas fa-book"></i>Dados Solicitante
+								</span>
+								<small class="title-small"></small>
+							</h2>
+						</div>
+						<div class="panel-body">
+							<div class="row">
+								<div class="col-md-3 form-group">
+									<label class="control-label" for="atividadeAtual">Atividade Atual</label>
+									<input type="text" class="form-control" name="atividadeAtual" id="atividadeAtual"
+										readonly>
+								</div>
+								<div class="col-md-3 form-group">
+									<label class="control-label" for="atividadeAnterior">Atividade Anterior</label>
+									<input type="text" class="form-control" name="atividadeAnterior"
+										id="atividadeAnterior" readonly>
+								</div>
+								<div class="col-md-3 form-group">
+									<label class="control-label" for="campoDescricao">Campo Descrição</label>
+									<input type="text" class="form-control" name="campoDescricao" id="campoDescricao"
+										readonly>
+								</div>
+								<div class="col-md-3 form-group">
+									<label class="control-label" for="modoFormulario">Modo Formulário</label>
+									<input type="text" class="form-control" name="modoFormulario" id="modoFormulario"
+										readonly>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-3 form-group">
+									<label class="control-label" for="idSolicitante">Id Solicitante</label>
+									<input type="text" class="form-control" name="idSolicitante" id="idSolicitante"
+										readonly>
+								</div>
+								<div class="col-md-3 form-group">
+									<label class="control-label" for="loginSolicitante">Login Solicitante</label>
+									<input type="text" class="form-control" name="loginSolicitante"
+										id="loginSolicitante" readonly>
+								</div>
+								<div class="col-md-3 form-group">
+									<label class="control-label" for="statusSolicitacao">Status Solicitação</label>
+									<input type="text" class="form-control" name="statusSolicitacao"
+										id="statusSolicitacao" readonly>
+								</div>
+								<div class="col-md-3 form-group">
+									<label class="control-label" for="idPasta">Id Pasta</label>
+									<input type="text" class="form-control" name="idPasta" id="idPasta" readonly>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-3 form-group">
+									<label class="control-label" for="idAlbaran">Id Albaran</label>
+									<input type="text" class="form-control" name="idAlbaran" id="idAlbaran" readonly>
+								</div>
+								<div class="col-md-3 form-group">
+									<label class="control-label" for="nomeAprovadorI">Nome Aprovador I</label>
+									<input type="text" class="form-control" name="nomeAprovadorI" id="nomeAprovadorI"
+										readonly>
+								</div>
+								<div class="col-md-3 form-group">
+									<label class="control-label" for="idAprovadorI">Id Aprovador I</label>
+									<input type="text" class="form-control" name="idAprovadorI" id="idAprovadorI"
+										readonly>
+								</div>
+								<div class="col-md-3 form-group">
+									<label class="control-label" for="codigoSociedade">Código Sociedade</label>
+									<input type="text" class="form-control" name="codigoSociedade" id="codigoSociedade"
+										readonly>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+				<section id="secCabecalho">
+					<div class="row">
+						<div class="col-md-2 form-group">
+							<label class="control-label" for="numeroSolicitacao">Nº Protocolo</label>
+							<input type="text" class="form-control" name="numeroSolicitacao" id="numeroSolicitacao" readonly>
+						</div>
+						<div class="col-md-2 form-group">
+							<label class="control-label" for="dataSolicitacao">Data da Abertura</label>
+							<input type="date" class="form-control" name="dataSolicitacao" id="dataSolicitacao"readonly>
+						</div>
+						<div class="col-md-2 form-group divALBSAP">
+							<label class="control-label required" for="ALBSAP">ALB/SAP</label>
+							<input type="text" class="form-control obgInicio" name="ALBSAP" id="ALBSAP" value="1" readonly />
+						</div>
+						<div class="col-md-2 col-md-offset-2">
+						</div>
+						<div class="col-md-2 form-group">
+							<label class="control-label">Status</label>
+							<input type="text" class="form-control" name="atividadeAtualDesc" id="atividadeAtualDesc"
+								readonly>
+						</div>
+					</div>
+				</section>
+				<section id="secSolicitante">
+					<div class="panel panel-default">
+						<div class="page-header">
+							<h2 class="painel-titulo">
+								<span style="padding-left: 20px;"
+									class="fs-no-margin fs-ellipsis fs-full-width fs-sm-padding-left">
+									<i class="fas fa-book"></i>Dados Solicitante
+								</span>
+								<small class="title-small"></small>
+							</h2>
+						</div>
+						<div class="panel-body">
+							<div class="row">
+								<div class="col-xs-6 col-md-6">
+									<div class="form-group">
+										<label class="control-label" for="nomeSolicitante">Nome do Solicitante</label>
+										<input type="text" class="form-control" name="nomeSolicitante" readonly>
+									</div>
+								</div>
+								<div class="col-xs-5 col-md-6">
+									<div class="form-group">
+										<label class="control-label" for="emailSolicitante">Email do Solicitante</label>
+										<input type="text" class="form-control" name="emailSolicitante" readonly>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+				<section id="secSolicitacao">
+					<div class="panel panel-default">
+						<div class="page-header">
+							<h2 class="painel-titulo">
+								<span style="padding-left: 20px;"
+									class="fs-no-margin fs-ellipsis fs-full-width fs-sm-padding-left"> <i class="fas fa-book"></i>Dados Solicitação
+								</span>
+								<span style="padding-right: 20px;" id="oFiltro" class="fs-no-margin fs-ellipsis fs-full-width fs-sm-padding-right">
+									<i class="flaticon flaticon-filter icon-xl icone_filtro hoverButton" aria-hidden="true"></i>
+									<i class="flaticon flaticon-undo icon-xl hoverButton" id="clearForm" aria-hidden="true"></i>
+								</span>
+							</h2>
+
+						</div>
+						<div class="row" style="padding: 8px">
+							<div class="form-group col-md-3">
+								<label for="tipoAlbaran" class="control-label required">Tipo Albaran</label>
+								<div class="custom-radio custom-radio-info">
+									<input type="radio" class="tipoAlbaran" name="tipoAlbaran" id="comContrato"
+										value="comContrato">
+									<label for="comContrato">Com Contrato</label>
+								</div>
+								<div class="custom-radio custom-radio-info">
+									<input type="radio" class="tipoAlbaran" name="tipoAlbaran" id="semContrato"
+										value="semContrato">
+									<label for="semContrato">Sem Contrato</label>
+								</div>
+							</div>
+							<div class="col-md-3 form-group">
+								<label class="control-label required" for="tipo">Tipo</label>
+								<input type="zoom" id="tipo" name="tipo" class="form-control" data-zoom="{
+														'displayKey':'txtDescricao',
+														'datasetId':'ds_form_cadastro_tipoPagamento',
+														'maximumSelectionLength':'1',
+														'placeholder':'Selecione o tipo',
+														'filterValues':'txtSituacao,ativo',
+														'fields':[
+															{'field':'txtDescricao','label':'TIPO'}
+														]
+													}" />
+							</div>
+							<div class="col-md-3 form-group divNumeroProcesso">
+								<label class="control-label required" for="numeroProcesso">Número
+									Processo</label>
+								<input type="zoom" id="numeroProcesso" name="numeroProcesso" class="form-control"
+									data-zoom="{
+												'displayKey':'numeroProcesso',
+												'datasetId':'ds_form_cadastro_baseProcessos',
+												'maximumSelectionLength':'1',
+												'placeholder':'Selecione processo',
+												'fields':[
+													{'field':'numeroProcesso','label':'PROCESSO'},
+													{'field':'vara','label':'VARA','visible':'false'},
+													{'field':'municipio','label':'MUNICIPIO','visible':'false'},
+													{'field':'escritorio','label':'ESCRITORIO','visible':'false'},
+													{'field':'empresa','label':'EMPRESA','visible':'false'},
+													{'field':'principal','label':'VALOR PR','visible':'false'},
+													{'field':'jurosATM','label':'JUROS','visible':'false'},
+													{'field':'caucao','label':'CAUÇÃO','visible':'false'},
+													{'field':'riscoProvavel','label':'RISCO','visible':'false'},
+													{'field':'reclamante','label':'RECLAMANTE','visible':'false'},
+													{'field':'apolice','label':'APOLICE','visible':'false'},
+													{'field':'prestadora','label':'PRESTADORA','visible':'false'},
+													{'field':'codPrestadora','label':'COD_PRESTADORA','visible':'false'}
+												]
+											}" />
+							</div>
+
+							<div class="col-md-3 form-group">
+								<label class="control-label required"  for="sociedade">Sociedade</label>
+								<input type="zoom" id="sociedade" name="sociedade" class="form-control" data-zoom="{
+												'displayKey':'sociedadeOT',
+												'datasetId':'ds_form_cadastro_ordemTrabalho',
+												'maximumSelectionLength':'1',
+												'placeholder':'Selecione a sociedade',
+												'fields':[
+													{'field':'sociedadeOT','label':'SOCIEDADE'}
+												]
+											}" />
+							</div>
+
+							<!-- <div class="col-md-2 form-group">
+								<label class="control-label required" for="sociedade">Sociedade</label>
+								<select name="sociedade" id="sociedade" class="form-control obgInicio">
+									<option value=""></option>
+									<option value="CEG">CEG</option>
+									<option value="CEG RIO">CEG RIO</option>
+									<option value="GNSPS">GNSPS</option>
+									<option value="GNS">GNS</option>
+									<option value="GNB">GNB</option>
+								</select>
+							</div> -->
+
+
+						</div>
+					</div>
+				</section>
+				<div class="row">
+					<div class="col-md-6 form-group">
+						<label class="control-label required" for="conta">Conta</label>
+						<input type="text" id="conta" name="conta" class="form-control obgInicio" readonly/>
+					</div>
+					<div class="col-md-6 form-group">
+						<label class="control-label required" for="ordemTrabalho">Ordem Trabalho</label>
+						<input type="text" id="ordemTrabalho" name="ordemTrabalho" class="form-control obgInicio" readonly/>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-4 form-group divTerceirizada">
+						<label class="control-label required" for="terceirizada">Terceirizada</label>
+						<input type="text" class="form-control obgInicio" name="terceirizada" id="terceirizada" />
+					</div>
+					<div class="col-md-4 form-group">
+						<label class="control-label required" for="numeroFornecedor">Código Fornecedor SAP</label>
+						<input type="text" class="form-control obgInicio" name="numeroFornecedor"
+							id="numeroFornecedor" />
+					</div>
+					<div class="col-md-4 form-group" id="numeroContrato">
+						<label class="control-label" for="numeroContrato">Número Contrato</label>
+						<input type="text" name="numeroContrato" id="numeroContrato" class="form-control obgInicio numeroContrato">
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-4 form-group" id="divnotafiscal">
+						<label class="control-label  required" for="numeroNotaFiscal">Nota Fiscal</label>
+						<input type="text" mask="######" name="numeroNotaFiscal" id="numeroNotaFiscal"
+							class="form-control obgInicio">
+					</div>
+					<div class="col-md-2 form-group">
+						<label class="control-label required" for="dataEmissao">Data da Emissão</label>
+						<input type="date" class="form-control obgInicio" name="dataEmissao" id="dataEmissao" />
+					</div>
+					<div class="col-md-6 form-group">
+						<label class="control-label required" for="emitente">Emitente</label>
+						<input type="text" id="emitente" class="form-control" name="emitente" readonly />
+					</div>
+				</div>
+				<hr>
+				<div id="divComContrato">
+					<div class="row">
+						<div class="col-md-3 form-group">
+							<label class="control-label required" for="moeda">Moeda</label>
+							<select name="moeda" id="moeda" class="form-control obgInicio">
+								<option value=""></option>
+								<option value="BRL">BRL</option>
+								<option value="EUR">EUR</option>
+								<option value="USD">USD</option>
+							</select>
+						</div>
+						<div class="col-md-3 form-group">
+							<label class="control-label required" for="conceito">Conceito</label>
+							<input type="text" name="conceito" id="conceito" class="form-control obgInicio">
+						</div>
+						<div class="col-md-3 form-group">
+							<label class="control-label required" for="item">Item</label>
+							<input type="text" name="item" id="item" class="form-control obgInicio">
+						</div>
+						<div class="col-md-3 form-group">
+							<label class="control-label required" for="quantidade">Quantidade</label>
+							<input type="text" name="quantidade" id="quantidade" class="form-control obgInicio">
+						</div>
+					</div>
+				</div>
+				<div>
+					<div class="row divSemContrato" id="divContaJurosCaucao">
+						<div class="col-md-3 form-group">
+							<label class="control-label" for="contaJuros">Conta Juros</label>
+							<input type="number" class="form-control obgInicio" name="contaJuros" id="contaJuros"
+								readonly />
+						</div>
+						<div class="col-md-3 form-group">
+							<label class="control-label" for="ordemTrabalhoJuros">Ordem Trabalho
+								Juros</label>
+							<input type="number" class="form-control obgInicio" name="ordemTrabalhoJuros"
+								id="ordemTrabalhoJuros" />
+						</div>
+						<div class="col-md-3 form-group">
+							<label class="control-label " for="contaCaucao">Conta Caução</label>
+							<input type="text" class="form-control obgInicio" name="contaCaucao" id="contaCaucao"
+								readonly />
+						</div>
+						<div class="col-md-3 form-group">
+							<label class="control-label" for="caucaoCondenacao">Caução
+								Condenação</label>
+							<input type="text" class="form-control obgInicio" name="caucaoCondenacao"
+								id="caucaoCondenacao" readonly />
+						</div>
+					</div>
+					<div class="row divSemContrato" id="divSemContrato">
+						<div class="col-md-3 form-group">
+							<label class="control-label required" for="reclamanteRTE">Reclamante RTE</label>
+							<input type="text" class="form-control obgInicio" name="reclamanteRTE" id="reclamanteRTE"
+								readonly />
+						</div>
+						<div class="col-md-3 form-group">
+							<label class="control-label required" for="municipio">Município</label>
+							<input type="text" class="form-control obgInicio" name="municipio" id="municipio"
+								readonly />
+						</div>
+						<div class="col-md-3 form-group">
+							<label class="control-label required" for="vara">Vara</label>
+							<input type="text" class="form-control obgInicio" name="vara" id="vara" readonly />
+						</div>
+						<div class="col-md-3 form-group">
+							<label class="control-label required" for="escritorio">Escritório</label>
+							<input type="zoom" id="escritorio" name="escritorio" class="form-control obgInicio"
+								readonly />
+						</div>
+					</div>
+				</div>
+				<hr>
+				<div class="row">
+					<div class="col-md-2 form-group divApolice" id="divApolice">
+						<label class="control-label required" for="apolice">Apólice</label>
+						<input type="text" name="apolice" id="apolice" class="form-control obgInicio" readonly>
+					</div>
+					<!-- <div class="col-md-2 form-group divcnpj" >
+						<label class="control-label required"  for="cnpjFornecedor">CNPJ</label>
+						<input type="text" class="form-control obgInicio" name="cnpjFornecedor" id="cnpjFornecedor"
+							mask="00.000.000/0000-00" />
+					</div> -->
+					<div class="col-md-2 form-group divcontratocaucao">
+						<label class="control-label required" for="contratocaucao">Contrato Caução</label>
+						<input type="text" class="form-control obgInicio" name="contratocaucao" id="contratocaucao" />
+					</div>
+
+					<div class="col-md-2 form-group divDescricao" style="display: hidden;">
+						<label class="control-label required" for="descricao">Descrição</label>
+						<input type="text" class="form-control obgInicio" name="descricao" id="descricao" />
+					</div>
+					<div class="col-md-2 form-group divAdvogadoRTE">
+						<label class="control-label required" for="advogadoRTE">Advogado RTE</label>
+						<input type="text" class="form-control obgInicio" name="advogadoRTE" id="advogadoRTE" />
+					</div>
+					<div class="col-md-2 form-group divRiscoProvavel">
+						<label class="control-label required" for="riscoProvavel">Risco Provável</label>
+						<input type="text" class="form-control obgInicio" name="riscoProvavel" id="riscoProvavel"
+							mask="#00.000.000.000.000,00" />
+					</div>
+				</div>
+				<section id="secDadosFin">
+					<div class="panel panel-default">
+						<div class="page-header">
+							<h2 class="painel-titulo">
+								<span style="padding-left: 20px;"
+									class="fs-no-margin fs-ellipsis fs-full-width fs-sm-padding-left">
+									<i class="fas fa-book"></i>Informações Financeiras
+								</span>
+								<small class="title-small"></small>
+							</h2>
+						</div>
+						<!-- -- campos da seção acima -->
+						<div class="panel-body" style="margin-top: 8px;">
+							<div class="row">
+								<div class="col-md-2 form-group">
+									<label class="control-label required" for="dataPagamento">Data Pagamento</label>
+									<input type="date" class="form-control obgInicio" name="dataPagamento"
+										id="dataPagamento" />
+								</div>
+								<div class="col-md-2 form-group">
+									<label class="control-label required" for="mes">Mês</label>
+									<input type="month" class="form-control obgInicio" name="mes" id="mes" />
+								</div>
+								<!-- <div class="col-md-2 form-group">
+									<label class="control-label required" for="formaPagamento">Forma Pagamento</label>
+									<input type="text" class="form-control obgInicio" name="formaPagamento"	id="formaPagamento" />
+								</div> -->
+								<div class="col-md-2 form-group">
+									<label class="control-label required" for="formaPagamento">Forma Pagamento</label>
+									<select class="form-control obgInicio" name="formaPagamento" id="formaPagamento" />
+										<option value=""></option>
+										<option value="dinheiro">Dinheiro</option>
+										<option value="depconta">Depósito em Conta</option>
+										<option value="boleto">Boleto</option>
+										<option value="cartaocredito">Cartão Crédito</option>
+										<option value="cartaodebito">Cartão Débito</option>
+									</select>
+								</div>
+								<div class="col-md-6 form-group">
+									<label class="control-label required" for="favorecido">Favorecido</label>
+									<input type="text" class="form-control obgInicio" name="favorecido" id="favorecido" />
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-2 form-group">
+									<label class="control-label required" for="valorPf">Valor Principal</label>
+									<input type="text" class="form-control obgInicio valorpf" name="valorPf"
+										id="valorPf" />
+								</div>
+								<div class="col-md-2 form-group divJuros">
+									<label class="control-labels" for="juros">Juros</label>
+									<input type="text" class="form-control obgInicio juros" name="juros" id="juros" />
+								</div>
+								<div class="col-md-2 form-group divCaucao">
+									<label class="control-label" for="caucao">Caução</label>
+									<input type="text" class="form-control obgInicio caucao" name="caucao" id="caucao"/>
+								</div>
+
+								<div class="col-md-3 form-group divTotal">
+									<label class="control-label required" for="total">Total</label>
+									<input type="text" class="form-control obgInicio" name="total" readonly id="total" />
+								</div>
+								<div class="col-md-1 divSomarValue" id="SomarValue">
+									<button type="button" class="btn btn-primary"
+										style="margin-top: 22px; height: 34px;" id="SomarValue"
+										data-dismiss="alert"><span aria-hidden="true">
+											<i class="flaticon flaticon-monetization-on icon-sm" aria-hidden="true"></i>
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+				<section id="secAprovacaoI">
+					<div class="panel panel-default">
+						<div class="page-header">
+							<h2 class="painel-titulo">
+								<span style="padding-left: 20px;"
+									class="fs-no-margin fs-ellipsis fs-full-width fs-sm-padding-left">
+									<i class="fas fa-book"></i>Aprovação Nível I
+								</span>
+								<small class="title-small"></small>
+								<div class="col-md-3 form-group" style="float: right;width: 120px;margin-top: -15px;">
+									<label style="font-size: 12px;">GB SAP</label>
+									<input type="text" class="form-control" name="userAprov1" readonly id="userAprov1" />
+								</div>
+							</h2>
+						</div>
+						<div class="panel-body">
+							<div class="row">
+								<div class="form-group col-md-1">
+									<div class="switch switch-success">
+										<label>Aprovado</label>
+										<input class="switch-input" type="radio" value="aprovado" name="aprovacaoI"
+											id="aprovacaoIAprovado" />
+										<label class="switch-button" for="aprovacaoIAprovado">Toggle</label>
+									</div>
+								</div>
+								<div class="form-group col-md-1">
+									<div class="switch switch-warning">
+										<label>Ajuste</label>
+										<input class="switch-input" type="radio" value="ajuste" name="aprovacaoI"
+											id="aprovacaoIAjuste" />
+										<label class="switch-button" for="aprovacaoIAjuste">Toggle</label>
+									</div>
+								</div>
+								<div class="form-group col-md-1">
+									<div class="switch switch-danger">
+										<label>Reprovado</label>
+										<input class="switch-input" type="radio" value="reprovado" name="aprovacaoI"
+											id="aprovacaoIReprovado" />
+										<label class="switch-button" for="aprovacaoIReprovado">Toggle</label>
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-12 form-group">
+									<label class="control-label" for="obsAprovacaoI">Observações</label>
+									<div class="input-group">
+										<textarea class="form-control" id="obsAprovacaoI" name="obsAprovacaoI"
+											rows="2"></textarea>
+										<span class="input-group-addon">
+											<span class="fluigicon fluigicon-comment"></span>
+										</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+				<section id="secAprovacaoII">
+					<div class="panel panel-default">
+						<div class="page-header">
+							<h2 class="painel-titulo">
+								<span style="padding-left: 20px;"
+									class="fs-no-margin fs-ellipsis fs-full-width fs-sm-padding-left">
+									<i class="fas fa-book"></i>Aprovação Nível II
+								</span>
+								<small class="title-small"></small>
+								<div class="col-md-3 form-group" style="float: right;width: 120px;margin-top: -15px;">
+									<label style="font-size: 12px;">GB SAP</label>
+									<input type="text" class="form-control" name="userAprov2" readonly id="userAprov2" />
+								</div>
+							</h2>
+						</div>
+						<div class="panel-body">
+							<div class="row">
+								<div class="form-group col-md-1">
+									<div class="switch switch-success">
+										<label>Aprovado</label>
+										<input class="switch-input" type="radio" value="aprovado" name="aprovacaoII"
+											id="aprovacaoIIAprovado" />
+										<label class="switch-button" for="aprovacaoIIAprovado">Toggle</label>
+									</div>
+								</div>
+								<div class="form-group col-md-1">
+									<div class="switch switch-warning">
+										<label>Ajuste</label>
+										<input class="switch-input" type="radio" value="ajuste" name="aprovacaoII"
+											id="aprovacaoIIAjuste" />
+										<label class="switch-button" for="aprovacaoIIAjuste">Toggle</label>
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-12 form-group">
+									<label class="control-label" for="obsAprovacaoII">Observações</label>
+									<div class="input-group">
+										<textarea class="form-control" id="obsAprovacaoII" name="obsAprovacaoII"
+											rows="2"></textarea>
+										<span class="input-group-addon">
+											<span class="fluigicon fluigicon-comment"></span>
+										</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+				<section id="secDadosGeracao">
+					<div class="panel panel-default">
+						<div class="page-header">
+							<h2 class="painel-titulo">
+								<span style="padding-left: 20px;"
+									class="fs-no-margin fs-ellipsis fs-full-width fs-sm-padding-left">
+									<i class="fas fa-book"></i>Geração de Dados
+								</span>
+								<small class="title-small"></small>
+							</h2>
+						</div>
+						<!-- -- campos da seção acima -->
+						<div class="panel-body" style="margin-top: 8px;">
+							<div class="row">
+								<div class="panel-body">
+									<div class="row" id="divbtnGerarAlbaran">
+										<div class="form-group col-md-3">
+											<input type="button" value="GERAR ALBARAN" id="btnGerarAlbaran"
+												class="btn btn-default">
+										</div>
+									</div>
+									<div class="row" id="divbtnVerAlbaran">
+										<div class="form-group col-md-3">
+											<input type="button" value="VER ALBARAN" id="btnVerAlbaran" class="btn btn-default">
+										</div>
+									</div>
+									<div class="row" id="divbtnAnexarBoleto">
+										<div class="form-group col-md-3">
+											<input type="button" value="ANEXAR BOLETO" id="btnAnexarBoleto"
+												class="btn btn-default" onclick="JSInterface.showCamera()">
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+			</div>
+		</form>
+	</div>
+</body>
+</html>

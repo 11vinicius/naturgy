@@ -1,0 +1,6 @@
+var INICIO0 = 0
+var INICIO1 = 6
+var APROVACAO_I = 8
+var AJUSTAR_SOLICITACAO = 7
+var APROVACAO_II = 9
+var FIM = 5

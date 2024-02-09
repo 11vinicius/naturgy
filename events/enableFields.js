@@ -1,0 +1,68 @@
+function enableFields(form){
+    let WKNumState = getValue("WKNumState")
+    bloqueiaCamposControle(form, WKNumState)
+    if(WKNumState != INICIO0 && WKNumState != INICIO1 && WKNumState != AJUSTAR_SOLICITACAO){
+        form.setEnabled("tipoAlbaran", false)
+        form.setEnabled("numeroProcesso", false)
+        form.setEnabled("tipo", false)
+        form.setEnabled("contaJuros", false)
+        form.setEnabled("ordemTrabalhoJuros", false)
+        form.setEnabled("contaCaucao", false)
+        form.setEnabled("caucaoCondenacao", false)
+        form.setEnabled("sociedade", false)
+        form.setEnabled("escritorio", false)
+        form.setEnabled("vara", false)
+        form.setEnabled("municipio", false)
+        form.setEnabled("ordemTrabalho", false)
+        form.setEnabled("conta", false)
+        form.setEnabled("emitente", false)
+        form.setEnabled("descricao", false)
+        form.setEnabled("terceirizada", false)
+        form.setEnabled("numeroFornecedor", false)
+        form.setEnabled("cnpjFornecedor", false)
+        form.setEnabled("apolice", false)
+        form.setEnabled("numeroNotaFiscal", false)
+        form.setEnabled("numeroContrato", false)
+        form.setEnabled("formaPagamento", false)
+        form.setEnabled("moeda", false)
+        form.setEnabled("mes", false)
+        form.setEnabled("dataEmissao", false)
+        form.setEnabled("dataPagamento", false)
+        form.setEnabled("favorecido", false)
+        form.setEnabled("reclamanteRTE", false)
+        form.setEnabled("advogadoRTE", false)
+        form.setEnabled("item", false)
+        form.setEnabled("quantidade", false)
+        form.setEnabled("conceito", false)
+        form.setEnabled("riscoProvavel", false)
+        form.setEnabled("valorPf", false)
+        form.setEnabled("juros", false)
+        form.setEnabled("caucao", false)
+        form.setEnabled("total", false)
+        form.setEnabled("contratocaucao", false)
+    }
+
+    if(WKNumState != APROVACAO_I){
+        form.setEnabled("aprovacaoI", false)
+        form.setEnabled("obsAprovacaoI", false)
+    }
+    
+    if(WKNumState != APROVACAO_II){
+        form.setEnabled("aprovacaoII", false)
+        form.setEnabled("obsAprovacaoII", false)
+    }
+}
+function bloqueiaCamposControle(form, WKNumState){
+    form.setEnabled("atividadeAtual", false)
+    form.setEnabled("atividadeAnterior", false)
+    form.setEnabled("campoDescricao", false)
+    form.setEnabled("modoFormulario", false)
+    form.setEnabled("idSolicitante", false)
+    form.setEnabled("loginSolicitante", false)
+    form.setEnabled("statusSolicitacao", false)
+    form.setEnabled("numeroSolicitacao", false)
+    form.setEnabled("dataSolicitacao", false)
+    form.setEnabled("atividadeAtualDesc", false)
+    form.setEnabled("nomeSolicitante", false)
+    form.setEnabled("emailSolicitante", false)
+}
