@@ -1,4 +1,5 @@
 <html>
+
 <head>
 	<link type="text/css" rel="stylesheet" href="/style-guide/css/fluig-style-guide.min.css" />
 	<script type="text/javascript" src="/portal/resources/js/jquery/jquery.js"></script>
@@ -309,6 +310,7 @@
 		}
 	</script>
 </head>
+
 <body>
 	<div class="fluig-style-guide" style="color: #004571;">
 		<form name="form" role="form">
@@ -406,15 +408,18 @@
 					<div class="row">
 						<div class="col-md-2 form-group">
 							<label class="control-label" for="numeroSolicitacao">Nº Protocolo</label>
-							<input type="text" class="form-control" name="numeroSolicitacao" id="numeroSolicitacao" readonly>
+							<input type="text" class="form-control" name="numeroSolicitacao" id="numeroSolicitacao"
+								readonly>
 						</div>
 						<div class="col-md-2 form-group">
 							<label class="control-label" for="dataSolicitacao">Data da Abertura</label>
-							<input type="date" class="form-control" name="dataSolicitacao" id="dataSolicitacao"readonly>
+							<input type="date" class="form-control" name="dataSolicitacao" id="dataSolicitacao"
+								readonly>
 						</div>
 						<div class="col-md-2 form-group divALBSAP">
 							<label class="control-label required" for="ALBSAP">ALB/SAP</label>
-							<input type="text" class="form-control obgInicio" name="ALBSAP" id="ALBSAP" value="1" readonly />
+							<input type="text" class="form-control obgInicio" name="ALBSAP" id="ALBSAP" value="1"
+								readonly />
 						</div>
 						<div class="col-md-2 col-md-offset-2">
 						</div>
@@ -459,11 +464,15 @@
 						<div class="page-header">
 							<h2 class="painel-titulo">
 								<span style="padding-left: 20px;"
-									class="fs-no-margin fs-ellipsis fs-full-width fs-sm-padding-left"> <i class="fas fa-book"></i>Dados Solicitação
+									class="fs-no-margin fs-ellipsis fs-full-width fs-sm-padding-left"> <i
+										class="fas fa-book"></i>Dados Solicitação
 								</span>
-								<span style="padding-right: 20px;" id="oFiltro" class="fs-no-margin fs-ellipsis fs-full-width fs-sm-padding-right">
-									<i class="flaticon flaticon-filter icon-xl icone_filtro hoverButton" aria-hidden="true"></i>
-									<i class="flaticon flaticon-undo icon-xl hoverButton" id="clearForm" aria-hidden="true"></i>
+								<span style="padding-right: 20px;" id="oFiltro"
+									class="fs-no-margin fs-ellipsis fs-full-width fs-sm-padding-right">
+									<i class="flaticon flaticon-filter icon-xl icone_filtro hoverButton"
+										aria-hidden="true"></i>
+									<i class="flaticon flaticon-undo icon-xl hoverButton" id="clearForm"
+										aria-hidden="true"></i>
 								</span>
 							</h2>
 
@@ -483,8 +492,9 @@
 								</div>
 							</div>
 							<div class="col-md-3 form-group">
-								<label class="control-label required" for="tipo">Tipo</label>
-								<input type="zoom" id="tipo" name="tipo" class="form-control" data-zoom="{
+								<label class="control-label required " for="tipo">Tipo</label>
+								<div id="divTipo">
+									<input type="zoom" id="tipo" name="tipo" class="form-control obgInicio" data-zoom="{
 														'displayKey':'txtDescricao',
 														'datasetId':'ds_form_cadastro_tipoPagamento',
 														'maximumSelectionLength':'1',
@@ -494,12 +504,15 @@
 															{'field':'txtDescricao','label':'TIPO'}
 														]
 													}" />
+								</div>
+
 							</div>
 							<div class="col-md-3 form-group divNumeroProcesso">
 								<label class="control-label required" for="numeroProcesso">Número
 									Processo</label>
-								<input type="zoom" id="numeroProcesso" name="numeroProcesso" class="form-control"
-									data-zoom="{
+								<div id="divNumeroProcesso">
+									<input type="zoom" id="numeroProcesso" name="numeroProcesso" class="form-control"
+										data-zoom="{
 												'displayKey':'numeroProcesso',
 												'datasetId':'ds_form_cadastro_baseProcessos',
 												'maximumSelectionLength':'1',
@@ -520,11 +533,14 @@
 													{'field':'codPrestadora','label':'COD_PRESTADORA','visible':'false'}
 												]
 											}" />
+								</div>
+
 							</div>
 
 							<div class="col-md-3 form-group">
 								<label class="control-label required" for="sociedade">Sociedade</label>
-								<input type="zoom" id="sociedade" name="sociedade" class="form-control" data-zoom="{
+								<div id="divSociedade">
+									<input type="zoom" id="sociedade" name="sociedade" class="form-control" data-zoom="{
 												'displayKey':'sociedadeOT',
 												'datasetId':'ds_form_cadastro_ordemTrabalho',
 												'maximumSelectionLength':'1',
@@ -533,6 +549,7 @@
 													{'field':'sociedadeOT','label':'SOCIEDADE'}
 												]
 											}" />
+								</div>
 							</div>
 
 							<!-- <div class="col-md-2 form-group">
@@ -552,11 +569,12 @@
 				<div class="row">
 					<div class="col-md-6 form-group">
 						<label class="control-label required" for="conta">Conta</label>
-						<input type="text" id="conta" name="conta" class="form-control obgInicio" readonly/>
+						<input type="text" id="conta" name="conta" class="form-control obgInicio" readonly />
 					</div>
 					<div class="col-md-6 form-group">
 						<label class="control-label required" for="ordemTrabalho">Ordem Trabalho</label>
-						<input type="text" id="ordemTrabalho" name="ordemTrabalho" class="form-control obgInicio" readonly/>
+						<input type="text" id="ordemTrabalho" name="ordemTrabalho" class="form-control obgInicio"
+							readonly />
 					</div>
 				</div>
 				<div class="row">
@@ -569,9 +587,10 @@
 						<input type="text" class="form-control obgInicio" name="numeroFornecedor"
 							id="numeroFornecedor" />
 					</div>
-					<div class="col-md-4 form-group numeroContrato" >
+					<div class="col-md-4 form-group numeroContrato">
 						<label class="control-label" for="numeroContrato">Número Contrato</label>
-						<input type="text" name="numeroContrato" id="numeroContrato" class="form-control obgInicio numeroContrato">
+						<input type="text" name="numeroContrato" id="numeroContrato"
+							class="form-control obgInicio numeroContrato">
 					</div>
 				</div>
 				<div class="row">
@@ -722,17 +741,18 @@
 								<div class="col-md-2 form-group">
 									<label class="control-label required" for="formaPagamento">Forma Pagamento</label>
 									<select class="form-control obgInicio" name="formaPagamento" id="formaPagamento" />
-										<option value=""></option>
-										<option value="dinheiro">Dinheiro</option>
-										<option value="depconta">Depósito em Conta</option>
-										<option value="boleto">Boleto</option>
-										<option value="cartaocredito">Cartão Crédito</option>
-										<option value="cartaodebito">Cartão Débito</option>
+									<option value=""></option>
+									<option value="dinheiro">Dinheiro</option>
+									<option value="depconta">Depósito em Conta</option>
+									<option value="boleto">Boleto</option>
+									<option value="cartaocredito">Cartão Crédito</option>
+									<option value="cartaodebito">Cartão Débito</option>
 									</select>
 								</div>
 								<div class="col-md-6 form-group">
 									<label class="control-label required" for="favorecido">Favorecido</label>
-									<input type="text" class="form-control obgInicio" name="favorecido" id="favorecido" />
+									<input type="text" class="form-control obgInicio" name="favorecido"
+										id="favorecido" />
 								</div>
 							</div>
 							<div class="row">
@@ -747,12 +767,14 @@
 								</div>
 								<div class="col-md-2 form-group divCaucao">
 									<label class="control-label" for="caucao">Caução</label>
-									<input type="text" class="form-control obgInicio caucao" name="caucao" id="caucao"/>
+									<input type="text" class="form-control obgInicio caucao" name="caucao"
+										id="caucao" />
 								</div>
 
 								<div class="col-md-3 form-group divTotal">
 									<label class="control-label required" for="total">Total</label>
-									<input type="text" class="form-control obgInicio" name="total" readonly id="total" />
+									<input type="text" class="form-control obgInicio" name="total" readonly
+										id="total" />
 								</div>
 								<div class="col-md-1 divSomarValue" id="SomarValue">
 									<button type="button" class="btn btn-primary"
@@ -776,7 +798,8 @@
 								<small class="title-small"></small>
 								<div class="col-md-3 form-group" style="float: right;width: 120px;margin-top: -15px;">
 									<label style="font-size: 12px;">GB SAP</label>
-									<input type="text" class="form-control" name="userAprov1" readonly id="userAprov1" />
+									<input type="text" class="form-control" name="userAprov1" readonly
+										id="userAprov1" />
 								</div>
 							</h2>
 						</div>
@@ -833,7 +856,8 @@
 								<small class="title-small"></small>
 								<div class="col-md-3 form-group" style="float: right;width: 120px;margin-top: -15px;">
 									<label style="font-size: 12px;">GB SAP</label>
-									<input type="text" class="form-control" name="userAprov2" readonly id="userAprov2" />
+									<input type="text" class="form-control" name="userAprov2" readonly
+										id="userAprov2" />
 								</div>
 							</h2>
 						</div>
@@ -894,7 +918,8 @@
 									</div>
 									<div class="row" id="divbtnVerAlbaran">
 										<div class="form-group col-md-3">
-											<input type="button" value="VER ALBARAN" id="btnVerAlbaran" class="btn btn-default">
+											<input type="button" value="VER ALBARAN" id="btnVerAlbaran"
+												class="btn btn-default">
 										</div>
 									</div>
 									<div class="row" id="divbtnAnexarBoleto">
@@ -912,4 +937,5 @@
 		</form>
 	</div>
 </body>
+
 </html>

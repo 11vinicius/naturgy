@@ -6,15 +6,33 @@ var APROVACAO_II = 9
 var FIM = 5
 
 var beforeSendValidate = function(numState,nextState){
+
    if (numState == INICIO0 || numState == INICIO1 || numState == AJUSTAR_SOLICITACAO) {
     setTimeout(() => {
       var campos = $('.obgInicio')
+
+      if($('#tipo').val().length == 0){
+        $('#divTipo').css('border', '1px solid #e57200');
+        $('#divTipo').css('border-radius', '4px');
+      }
+
+      if($('#sociedade').val().length == 0){
+        $('#divSociedade').css('border', '1px solid #e57200');
+        $('#divSociedade').css('border-radius', '4px');
+      }
+
+      if($('#numeroProcesso').val().length == 0){
+        $('#divNumeroProcesso').css('border', '1px solid #e57200');
+        $('#divNumeroProcesso').css('border-radius', '4px');
+      }
       
       for (var i = 0; i < campos.length; i++) {
         var campo = campos[i]
         const campoItem = $(campo).parent().find('input, select, textarea')
         const campoType = $(campoItem).attr('type')
         const campoName = $(campoItem).attr('name')
+    
+
         if ($("#" + campoName).val() == "" && campoType == "zoom") {
           $(campo).siblings("span").children(":first").children().css({ "border-color": "#e57200" })
           $(campo).change(() => {
