@@ -635,30 +635,7 @@
 					</div>
 				</div>
 				<div>
-					<div class="row divSemContrato" id="divContaJurosCaucao">
-						<div class="col-md-3 form-group">
-							<label class="control-label" for="contaJuros">Conta Juros</label>
-							<input type="number" class="form-control obgInicio" name="contaJuros" id="contaJuros"
-								readonly />
-						</div>
-						<div class="col-md-3 form-group">
-							<label class="control-label" for="ordemTrabalhoJuros">Ordem Trabalho
-								Juros</label>
-							<input type="number" class="form-control obgInicio" name="ordemTrabalhoJuros"
-								id="ordemTrabalhoJuros" />
-						</div>
-						<div class="col-md-3 form-group">
-							<label class="control-label " for="contaCaucao">Conta Caução</label>
-							<input type="text" class="form-control obgInicio" name="contaCaucao" id="contaCaucao"
-								readonly />
-						</div>
-						<div class="col-md-3 form-group">
-							<label class="control-label" for="caucaoCondenacao">Caução
-								Condenação</label>
-							<input type="text" class="form-control obgInicio" name="caucaoCondenacao"
-								id="caucaoCondenacao" readonly />
-						</div>
-					</div>
+
 					<div class="row divSemContrato" id="divSemContrato">
 						<div class="col-md-3 form-group">
 							<label class="control-label required" for="reclamanteRTE">Reclamante RTE</label>
@@ -725,12 +702,12 @@
 						<!-- -- campos da seção acima -->
 						<div class="panel-body" style="margin-top: 8px;">
 							<div class="row">
-								<div class="col-md-2 form-group">
+								<div class="col-md-3 form-group">
 									<label class="control-label required" for="dataPagamento">Data Pagamento</label>
 									<input type="date" class="form-control obgInicio" name="dataPagamento"
 										id="dataPagamento" />
 								</div>
-								<div class="col-md-2 form-group">
+								<div class="col-md-3 form-group">
 									<label class="control-label required" for="mes">Mês</label>
 									<input type="month" class="form-control obgInicio" name="mes" id="mes" />
 								</div>
@@ -738,7 +715,7 @@
 									<label class="control-label required" for="formaPagamento">Forma Pagamento</label>
 									<input type="text" class="form-control obgInicio" name="formaPagamento"	id="formaPagamento" />
 								</div> -->
-								<div class="col-md-2 form-group">
+								<div class="col-md-3 form-group">
 									<label class="control-label required" for="formaPagamento">Forma Pagamento</label>
 									<select class="form-control obgInicio" name="formaPagamento" id="formaPagamento" />
 									<option value=""></option>
@@ -749,22 +726,19 @@
 									<option value="cartaodebito">Cartão Débito</option>
 									</select>
 								</div>
-								<div class="col-md-6 form-group">
+								<div class="col-md-3 form-group">
 									<label class="control-label required" for="favorecido">Favorecido</label>
 									<input type="text" class="form-control obgInicio" name="favorecido"
 										id="favorecido" />
 								</div>
 							</div>
 							<div class="row">
-								<div class="col-md-2 form-group">
+								<div class="col-md-3 form-group">
 									<label class="control-label required" for="valorPf">Valor Principal</label>
 									<input type="text" class="form-control obgInicio valorpf" name="valorPf"
 										id="valorPf" />
 								</div>
-								<div class="col-md-2 form-group divJuros">
-									<label class="control-labels" for="juros">Juros</label>
-									<input type="text" class="form-control obgInicio juros" name="juros" id="juros" />
-								</div>
+
 								<div class="col-md-2 form-group divCaucao">
 									<label class="control-label" for="caucao">Caução</label>
 									<input type="text" class="form-control obgInicio caucao" name="caucao"
@@ -782,6 +756,36 @@
 										data-dismiss="alert"><span aria-hidden="true">
 											<i class="flaticon flaticon-monetization-on icon-sm" aria-hidden="true"></i>
 									</button>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-3 form-group divJuros">
+									<label class="control-labels" for="juros">Juros</label>
+									<input type="text" class="form-control obgInicio juros" name="juros" id="juros" />
+								</div>
+								<div class="col-md-3 form-group">
+									<label class="control-label" for="contaJuros">Conta Juros</label>
+									<input type="number" class="form-control obgInicio" name="contaJuros"
+										id="contaJuros" readonly />
+								</div>
+								<div class="col-md-3 form-group">
+									<label class="control-label" for="ordemTrabalhoJuros">Ordem Trabalho
+										Juros</label>
+									<input type="number" class="form-control obgInicio" name="ordemTrabalhoJuros"
+										id="ordemTrabalhoJuros" />
+								</div>
+							</div>
+							<div class="row divSemContrato" id="divContaJurosCaucao">
+								<div class="col-md-3 form-group">
+									<label class="control-label " for="contaCaucao">Conta Caução</label>
+									<input type="text" class="form-control obgInicio" name="contaCaucao"
+										id="contaCaucao" readonly />
+								</div>
+								<div class="col-md-3 form-group">
+									<label class="control-label" for="caucaoCondenacao">Caução
+										Condenação</label>
+									<input type="text" class="form-control obgInicio" name="caucaoCondenacao"
+										id="caucaoCondenacao" readonly />
 								</div>
 							</div>
 						</div>
