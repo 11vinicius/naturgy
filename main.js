@@ -282,6 +282,8 @@ $(document).ready(() => {
     $(".numeroContrato").find('label').addClass('required')
     $("#numeroNotaFiscal").addClass('obgInicio')
     $(".divTerceirizada").hide();
+    $(".divcontaJuros").hide()
+    $(".divordemTrabalhoJuros").hide()
     $(".divTotal").hide();
     $(".divApolice").hide();
     $(".divDescricao").hide();
@@ -309,6 +311,8 @@ $(document).ready(() => {
       $(".divAdvogadoRTE").hide("slow");
       $(".divRiscoProvavel").hide();
       $(".divcontratocaucao").hide();
+      $(".divcontaJuros").hide()
+      $(".divordemTrabalhoJuros").hide()
 
     } else {
       $("#numeroNotaFiscal").removeClass('obgInicio')
@@ -319,6 +323,8 @@ $(document).ready(() => {
       $(".divAdvogadoRTE").show("slow");
       $(".divRiscoProvavel").show();
       $(".divcontratocaucao").show();
+      $(".divcontaJuros").show()
+      $(".divordemTrabalhoJuros").show()
 
 
     }
@@ -331,6 +337,7 @@ $(document).ready(() => {
     let albaran = ev.target.value
     if (albaran == "comContrato") {
       $("#divComContrato").show()
+      $('.divSemContrato').hide()
       $(".numeroContrato").show()
       $(".divcnpj").show();
       $(".divnotafiscal").removeClass('required')
@@ -338,7 +345,8 @@ $(document).ready(() => {
       $(".divJuros").hide("slow");
       $(".divCaucao").hide("slow");
       $("#SomarValue").hide();
-
+      $(".divcontaJuros").hide()
+      $(".divordemTrabalhoJuros").hide()
     }
 
     if (albaran == "semContrato") {
@@ -350,6 +358,8 @@ $(document).ready(() => {
       $(".divnotafiscal").addClass('required')
       $("#divnotafiscal").find('label').removeClass('required')
       $("#numeroNotaFiscal").removeClass('obgInicio')
+      $(".divcontaJuros").show()
+      $(".divordemTrabalhoJuros").show()
     }
   })
 
@@ -512,8 +522,14 @@ function setSelectedZoomItem(selectedItem) {
         $("#contaJuros").val(contaOT)
         $("#ordemTrabalhoJuros").val(ordemTrabalhoOT)
       }
+      $(".divSemContrato").hide()
+
+      if($('input[name=tipoAlbaran').val() == 'sem contrato'){
+        $(".divSemContrato").show()
+      }
+
     } else {
-      $("#divContaJurosCaucao").hide()
+      $(".divSemContrato").hide()
     }
   }
 
