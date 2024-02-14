@@ -36,7 +36,7 @@ var beforeSendValidate = function(numState,nextState){
         if ($("#" + campoName).val() == "" && campoType == "zoom") {
           $(campo).siblings("span").children(":first").children().css({ "border-color": "#e57200" })
           $(campo).change(() => {
-            if ($("#" + campoName).val() != "") $("#" + campoName).siblings("span").children(":first").children().css({ "border-color": "#004571" })
+            if ($("#" + campoName).val() != "") $("#" + campoName).siblings("span").children(":first").children().css({ "border-color": "" })
             else $("#" + campoName).siblings("span").children(":first").children().css({ "border-color": "#e57200" })
           })
         }
@@ -44,7 +44,7 @@ var beforeSendValidate = function(numState,nextState){
           $("#" + campoName).css({ "border-color": "#e57200" })
           $("#" + campoName).change(function () {
             if ($("#" + campoName).val() == "") $("#" + campoName).css({ "border-color": "#e57200" })
-            else $("#" + campoName).css({ "border-color": "#004571" })
+            else $("#" + campoName).css({ "border-color": "" })
           })
         }
       }
@@ -63,19 +63,16 @@ function comContrato() {
     var contaOT = dataset.values[0].contaOT
     var ordemTrabalhoOT = dataset.values[0].ordemTrabalhoOT
     $("#conta").val(contaOT)
-    $("#conta").css({ "border-color": "#004571" })
+    // $("#conta").css({ "border-color": "#004571" })
     $("#ordemTrabalho").val(ordemTrabalhoOT)
-    $("#ordemTrabalho").css({ "border-color": "#004571" })
+    // $("#ordemTrabalho").css({ "border-color": "#004571" })
+
   }
-
 }
-
 function semContrato() {
   var sociedade = $("#sociedade").val(); //SEG
   //var tipo = "Juros"
   var tipo = $("#tipo").val();
-  console.log(sociedade)
-
   var c1 = DatasetFactory.createConstraint("sociedadeOT", sociedade[0], sociedade[0], ConstraintType.MUST)
   var c2 = DatasetFactory.createConstraint("tipoPagamentoOT", tipo[0], tipo[0], ConstraintType.MUST)
   var dataset2 = DatasetFactory.getDataset("ds_form_cadastro_ordemTrabalho", null, [c1, c2], null)
@@ -106,6 +103,12 @@ function semContrato() {
       if (caucao) {
         $(".numeroContrato").find('label').removeClass('required')
       }
+
+      if(jurosATM != 0 ){
+        $('#divcontaJuros').find('label').addClass('required')
+        $('#divordemTrabalhoJuros').find('label').addClass('required')
+      }
+
       $("#vara").val(vara)
       $("#municipio").val(municipio)
       $("#escritorio").val(escritorio)
@@ -128,6 +131,7 @@ $(document).ready(() => {
   // Pegar Num. Sequencial
 
   let atvAtual = $('#atividadeAtual').val();
+
   if (atvAtual == 0) {
     var c1 = DatasetFactory.createConstraint("processId", 'controle_processos_trabalhistas', 'controle_processos_trabalhistas', ConstraintType.MUST);
     var c2 = DatasetFactory.createConstraint('status', '1', '1', ConstraintType.MUST_NOT);
@@ -185,6 +189,21 @@ $(document).ready(() => {
     }
   });
 
+ $('#juros').on('change',function(){
+  if($('#juros').val() != 0){
+    $('#divcontaJuros').find('label').addClass('required')
+    $('#divordemTrabalhoJuros').find('label').addClass('required')
+  }else{
+    $('#divcontaJuros').find('label').removeClass('required')
+    $('#divordemTrabalhoJuros').find('label').removeClass('required')
+  }
+ 
+ })
+
+  // if(juros <= 0 ){
+ 
+  //   console.log(juros)
+  // }
 
 
   $('#SomarValue').on('click', function () {

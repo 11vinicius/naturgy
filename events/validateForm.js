@@ -34,7 +34,8 @@ function validateForm(form){
             var caucao = form.getValue("caucao")
             var juros = form.getValue("juros")
             var tipo = form.getValue('tipo')
-            
+            var tipo = form.getValue('juros')
+
 
             if(tipo == "CONDENAÇÃO - TERCEIROS" || tipo == "CONDENAÇÃO - PRÓPRIO" || tipo == "CONDENAÇÃO - TERCEIROS - CAUÇÃO"){
                 if(juros != 0){
@@ -43,6 +44,11 @@ function validateForm(form){
                     if(campoVazio(form,"ordemTrabalhoJuros")) msgErro += "<li>É necessário informar a <b>Ordem Trabalho Juros</b>.</li>"
                     if(campoVazio(form,"contaCaucao")) msgErro += "<li>É necessário informar a <b>Conta Caução</b>.</li>"
                 }
+            }
+
+            if(juros != 0){
+                if(campoVazio(form,"contaJuros")) msgErro += "<li>É necessário informar a <b>Conta Juros</b>.</li>"
+                if(campoVazio(form,"ordemTrabalhoJuros")) msgErro += "<li>É necessário informar a <b>Ordem Trabalho Juros</b>.</li>"
             }
 
             if(caucao == '' || caucao == null){
@@ -62,7 +68,7 @@ function validateForm(form){
             if(campoVazio(form,"emitente")) msgErro += "<li>É necessário informar o <b>Emitente</b>.</li>"
             if(campoVazio(form,"dataPagamento")) msgErro += "<li>É necessário informar a <b>Data Pagamento</b>.</li>"
             if(campoVazio(form,"formaPagamento")) msgErro += "<li>É necessário informar a <b>Forma Pagamento</b>.</li>"
-            // if(campoVazio(form,"juros")) msgErro += "<li>É necessário informar o <b>Juros</b>.</li>"
+            if(campoVazio(form,"mes")) msgErro += "<li>É necessário informar o <b>Mês</b>.</li>"
             // if(campoVazio(form,"caucao")) msgErro += "<li>É necessário informar o <b>Caução</b>.</li>"
            
         }
